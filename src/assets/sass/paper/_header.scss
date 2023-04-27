@@ -1,0 +1,64 @@
+section.header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 60px;
+  background-color: $white-color;
+  .logo{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .icon{
+      width: 41px;
+      height: 33px;
+      margin-right: 10px;
+    }
+    .text{
+      width: 80px;
+      font-style: normal;
+      font-weight: 800;
+      font-size: 16px;
+      line-height: 18px;
+      text-transform: uppercase;
+      color: $blue-color;
+    }
+  }
+  .profile{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .text{
+      text-align: right;
+      font-size: 14px;
+      line-height: 17px;
+      display: flex;
+      flex-direction: column;
+      max-width: 70px;
+      .name{
+        font-weight: 700;
+        color: $blue-color;
+      }
+      .post{
+        font-weight: 400;
+        color: $medium-color;
+      }
+    }
+    .avatar{
+      width: 44px;
+      height: 44px;
+      margin-left: 8px;
+    }
+  }
+}
+
+@media (max-width: 1366px) {
+  section.header{
+    padding: 20px 40px;
+  }
+}
+
+@media (max-width: 600px) {
+  section.header{
+    padding: 20px 12px;
+  }
+}
