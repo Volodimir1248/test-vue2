@@ -6,13 +6,13 @@
           </h1>
       </div>
       <div class="search">
-          <input class="search_input" type="text" v-model="search_text">
+          <input class="search_input" type="text" v-model="filter.search_text">
       </div>
       <div class="resp_table">
           <div class="sorting" :class="{active: sorting_active}">
               <div
                   class="select"
-                  :class="filter_type !== '' ? 'active' : ''"
+                  :class="filter.type !== '' ? 'active' : ''"
                   @click="sorting_active = !sorting_active"
               >
                   <span class="placeholder">
@@ -36,13 +36,13 @@
               <div class="buttons">
                   <button
                       class="button up"
-                      :class="{active: filter_asc === 'desc'}"
-                      @click="filter_asc = 'desc'"
+                      :class="{active: filter.asc === 'desc'}"
+                      @click="filter.asc = 'desc'"
                   />
                   <button
                       class="button down"
-                      :class="{active: filter_asc === 'asc' }"
-                      @click="filter_asc = 'asc'"
+                      :class="{active: filter.asc === 'asc' }"
+                      @click="filter.asc = 'asc'"
                   />
               </div>
           </div>
@@ -50,32 +50,32 @@
               <thead>
                   <tr>
                       <th class="name" scope="col" @click="change_filter('name')">
-                          ФИО
-                          <i class="icon" :class="{'active': filter_type === 'name', 'bottom' : filter_asc === 'asc', 'top' : filter_asc === 'desc'}"></i>
+                          ФИ
+                          <i class="icon" :class="{'active': filter.type === 'name', 'bottom' : filter.asc === 'asc', 'top' : filter.asc === 'desc'}"></i>
                       </th>
                       <th class="date" scope="col" @click="change_filter('date')">
                           Дата подачи заявления
-                          <i class="icon" :class="{'active': filter_type === 'date', 'bottom' : filter_asc === 'asc', 'top' : filter_asc === 'desc'}"></i>
+                          <i class="icon" :class="{'active': filter.type === 'date', 'bottom' : filter.asc === 'asc', 'top' : filter.asc === 'desc'}"></i>
                       </th>
                       <th class="rus" scope="col" @click="change_filter('rus')">
                           Балл по русскому
-                          <i class="icon" :class="{'active': filter_type === 'rus', 'bottom' : filter_asc === 'asc', 'top' : filter_asc === 'desc'}"></i>
+                          <i class="icon" :class="{'active': filter.type === 'rus', 'bottom' : filter.asc === 'asc', 'top' : filter.asc === 'desc'}"></i>
                       </th>
                       <th class="math" scope="col" @click="change_filter('math')">
                           Балл по математике
-                          <i class="icon" :class="{'active': filter_type === 'math', 'bottom' : filter_asc === 'asc', 'top' : filter_asc === 'desc'}"></i>
+                          <i class="icon" :class="{'active': filter.type === 'math', 'bottom' : filter.asc === 'asc', 'top' : filter.asc === 'desc'}"></i>
                       </th>
                       <th class="info" scope="col" @click="change_filter('info')">
                           Балл по информатике
-                          <i class="icon" :class="{'active': filter_type === 'info', 'bottom' : filter_asc === 'asc', 'top' : filter_asc === 'desc'}"></i>
+                          <i class="icon" :class="{'active': filter.type === 'info', 'bottom' : filter.asc === 'asc', 'top' : filter.asc === 'desc'}"></i>
                       </th>
                       <th class="sum" scope="col" @click="change_filter('sum')">
                           Суммарный балл
-                          <i class="icon" :class="{'active': filter_type === 'sum', 'bottom' : filter_asc === 'asc', 'top' : filter_asc === 'desc'}"></i>
+                          <i class="icon" :class="{'active': filter.type === 'sum', 'bottom' : filter.asc === 'asc', 'top' : filter.asc === 'desc'}"></i>
                       </th>
                       <th class="percent" scope="col" @click="change_filter('percent')">
                           Процент
-                          <i class="icon" :class="{'active': filter_type === 'percent', 'bottom' : filter_asc === 'asc', 'top' : filter_asc === 'desc'}"></i>
+                          <i class="icon" :class="{'active': filter.type === 'percent', 'bottom' : filter.asc === 'asc', 'top' : filter.asc === 'desc'}"></i>
                       </th>
                   </tr>
               </thead>
@@ -129,10 +129,21 @@ export default {
     data () {
         return {
             applicants: {},
-            filter_type: '',
-            filter_asc: 'desc',
-            search_text: '',
             sorting_active: false,
+            filter:{
+                type: "",
+                asc: "desc",
+                search_text: ""
+            }
+        }
+    },
+
+    watch:{
+        filter:{
+            deep: true,
+            handler(){
+                this.localStorage.setItem('filter', JSON.stringify(this.filter))
+            }
         }
     },
 
@@ -151,9 +162,9 @@ export default {
         applicant_list(){
             let list = []
 
-            if (this.search_text !== ''){
+            if (this.filter.search_text !== ''){
                 for (let applicant of this.applicants) {
-                    if (applicant.name.toLowerCase().indexOf(this.search_text.toLowerCase()) > -1) {
+                    if (applicant.name.toLowerCase().indexOf(this.filter.search_text.toLowerCase()) > -1) {
                         list.push(applicant)
                     }
                 }
@@ -166,7 +177,7 @@ export default {
         },
         sorting_name(){
             for (let item of this.drop_down_list) {
-                if (this.filter_type === item.id){
+                if (this.filter.type === item.id){
                     return item.label
                 }
             }
@@ -174,12 +185,18 @@ export default {
     },
 
     created() {
-        this.init()
+        this.check_filter()
+        this.applicants_handler()
     },
 
     methods:{
+        check_filter(){
+            if (this.localStorage.getItem('filter')){
+                this.filter = JSON.parse(this.localStorage.getItem('filter'))
+            }
+        },
         choose_filter_type(id){
-            this.filter_type = id
+            this.filter.type = id
             this.sorting_active = false
         },
         style_percent(percent){
@@ -204,7 +221,7 @@ export default {
                 return 'orange'
             }
         },
-        init(){
+        applicants_handler(){
             let applicants = this.$store.getters.getApplicants
 
             let list = []
@@ -240,24 +257,23 @@ export default {
 
         },
         change_filter(type){
-            if (this.filter_type === type) {
-                if (this.filter_asc === 'asc') {
-                    this.filter_asc = 'desc'
+            if (this.filter.type === type) {
+                if (this.filter.asc === 'asc') {
+                    this.filter.asc = 'desc'
                 }else{
-                    this.filter_asc = 'asc'
+                    this.filter.asc = 'asc'
                 }
             }else{
-                this.filter_type = type
+                this.filter.type = type
             }
         },
         compareNumbers(a, b) {
-            if (this.filter_asc === 'asc') {
-                return a[this.filter_type] < b[this.filter_type] ? 1 : -1;
+            if (this.filter.asc === 'asc') {
+                return a[this.filter.type] < b[this.filter.type] ? 1 : -1;
             }else{
-                return a[this.filter_type] > b[this.filter_type] ? 1 : -1;
+                return a[this.filter.type] > b[this.filter.type] ? 1 : -1;
             }
         },
     }
-
 }
 </script>
